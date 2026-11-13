@@ -1,0 +1,20 @@
+{
+  "name": "streamx",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android"
+  },
+  "dependencies": {
+    "expo": "58.0.25",
+    "expo-status-bar": "58.0.5",
+    "react": "19.3.1",
+    "react-native": "0.88.1",
+    "expo-av": "16.0.8",
+    "expo-document-picker": "58.0.5",
+    "lucide-react-native": "1.72.0",
+    "react-native-svg": "15.16.1"
+  },
+  "private": true
+}
