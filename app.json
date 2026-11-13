@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "StreamX",
+    "slug": "streamx",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0F19",
+    "android": {
+      "package": "com.keshdev.streamx"
+    },
+    "plugins": [
+      "expo-av",
+      "expo-document-picker"
+    ]
+  }
+}
