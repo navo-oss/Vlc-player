@@ -1,20 +1,32 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { Download, Play, FileVideo } from 'lucide-react-native';
+import { addMagnetAndGetFiles } from '../utils/torrentApi'; // අලුතින් ගෙනාපු API එක
 
 export default function HomeScreen({ onPlay }) {
   const [magnetLink, setMagnetLink] = useState('');
-  
-  // මේක තාවකාලික Mock Data එකක්. පස්සේ අපි මේක Torrent එකෙන් එන ෆයිල් ලිස්ට් එකට replace කරනවා.
   const [files, setFiles] = useState([]);
+  const [isFetching, setIsFetching] = useState(false); // Loading state එක
 
-  const handleFetchFiles = () => {
-    if (!magnetLink) return;
-    // පස්සේ මෙතනට Backend/Torrent logic එක එනවා. දැනට ලස්සනට පෙන්නන්න fake files 2ක් දාමු.
-    setFiles([
-      { id: '1', name: 'Avengers.Doomsday.2026.1080p.mp4', size: '2.4 GB', streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
-      { id: '2', name: 'Avengers.Doomsday.2026.Sample.mp4', size: '45 MB', streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' }
-    ]);
+  const handleFetchFiles = async () => {
+    if (!magnetLink) {
+      Alert.alert("Error", "Please paste a magnet link first!");
+      return;
+    }
+    
+    setIsFetching(true);
+    setFiles([]); // කලින් තිබ්බ ඒවා මකනවා
+
+    // API එක හරහා Backend එකට කතා කරලා ඇත්තම ෆයිල්ස් ටික ගන්නවා
+    const fetchedFiles = await addMagnetAndGetFiles(magnetLink);
+    
+    if (fetchedFiles && fetchedFiles.length > 0) {
+      setFiles(fetchedFiles);
+    } else {
+      Alert.alert("Error", "Failed to fetch torrent files. Check the backend connection.");
+    }
+    
+    setIsFetching(false);
   };
 
   const renderFileItem = ({ item }) => (
@@ -31,6 +43,7 @@ export default function HomeScreen({ onPlay }) {
           <Play color="#00F0FF" size={22} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconBtn}>
+          {/* ඩවුන්ලෝඩ් ඔප්ෂන් එක පස්සේ හදන්න පුළුවන් */}
           <Download color="#B026FF" size={22} />
         </TouchableOpacity>
       </View>
@@ -49,8 +62,12 @@ export default function HomeScreen({ onPlay }) {
           value={magnetLink}
           onChangeText={setMagnetLink}
         />
-        <TouchableOpacity style={styles.fetchBtn} onPress={handleFetchFiles}>
-          <Text style={styles.fetchBtnText}>Fetch</Text>
+        <TouchableOpacity style={styles.fetchBtn} onPress={handleFetchFiles} disabled={isFetching}>
+          {isFetching ? (
+            <ActivityIndicator color="#0B0F19" />
+          ) : (
+            <Text style={styles.fetchBtnText}>Fetch</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -79,7 +96,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   neonText: {
-    color: '#00F0FF', // Neon Blue
+    color: '#00F0FF',
     textShadowColor: 'rgba(0, 240, 255, 0.8)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
@@ -91,7 +108,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)', // Glass effect
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
@@ -110,6 +127,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 10,
     elevation: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 80,
   },
   fetchBtnText: {
     color: '#0B0F19',
@@ -120,7 +140,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   fileCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)', // Glassmorphism card
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 16,
